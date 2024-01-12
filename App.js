@@ -22,7 +22,8 @@ function App() {
   return (
     <SafeAreaView>
       <View>
-        <Text>Todo App</Text>
+        <Text>Todo
+        </Text>
       </View>
     </SafeAreaView>
   );
