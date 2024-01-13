@@ -5,7 +5,7 @@
  * @format
  */
 
-import React, {useState} from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   SafeAreaView,
   ScrollView,
@@ -19,6 +19,7 @@ import generalStyles from './src/utils/generalStyles';
 import Input from './src/components/input';
 import {colors} from './src/utils/constants';
 import Todo from './src/components/todo';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 function App() {
   const [text, setText] = useState('');
@@ -31,9 +32,27 @@ function App() {
       completed: false,
     };
 
-    setTodos([...todos, newTodo]);
-    setText('');
+    AsyncStorage.setItem('@todos', JSON.stringify([...todos, newTodo]))
+      .then(() => {
+        setTodos([...todos, newTodo]);
+        setText('');
+      })
+      .catch(err => {
+        Alert.alert("Hata", "Kayıt esnasında bir hata oluştu")
+      });
   };
+
+  useEffect(() => {
+    AsyncStorage.getItem('@todos')
+      .then(res => {
+        console.log(res);
+        if (res !== null) {
+          const parsedRes = JSON.parse(res);
+          setTodos(parsedRes);
+        }
+      })
+      .catch(err => console.log(err));
+  }, []);
 
   return (
     <SafeAreaView style={[generalStyles.flex1, generalStyles.bgWhite]}>
@@ -52,9 +71,14 @@ function App() {
           </Text>
         ) : (
           <ScrollView style={styles.scrollView}>
-            {
-              todos?.map(todo=><Todo key={todo?.id} todo={todo} />)
-            }
+            {todos?.map(todo => (
+              <Todo
+                todos={todos}
+                setTodos={setTodos}
+                key={todo?.id}
+                todo={todo}
+              />
+            ))}
           </ScrollView>
         )}
       </View>
@@ -76,7 +100,7 @@ const styles = StyleSheet.create({
   },
   scrollView: {
     flexGrow: 1,
-  }
+  },
 });
 
 export default App;
