@@ -4,6 +4,7 @@ import styles from './style';
 import Icon from 'react-native-vector-icons/AntDesign';
 import {colors} from '../../utils/constants';
 import EditModal from '../editModel';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 
 const Todo = ({todo = {}, todos = [], setTodos = () => {}}) => {
   const [openModal, setOpenModal] = useState(false);
@@ -23,7 +24,9 @@ const Todo = ({todo = {}, todos = [], setTodos = () => {}}) => {
           text: 'Sil',
           onPress: () => {
             const filteredTodos = todos.filter(item => item.id !== todo.id);
-            setTodos(filteredTodos);
+            AsyncStorage.setItem('@todos', JSON.stringify(filteredTodos)).then(
+              () => setTodos(filteredTodos),
+            );
           },
           style: 'destructive',
         },
@@ -54,7 +57,9 @@ const Todo = ({todo = {}, todos = [], setTodos = () => {}}) => {
                 tempArr.push(newTodo);
               }
             }
-            setTodos(tempArr);
+            AsyncStorage.setItem('@todos', JSON.stringify(tempArr)).then(() =>
+              setTodos(tempArr),
+            );
           },
           style: 'destructive',
         },
@@ -73,20 +78,22 @@ const Todo = ({todo = {}, todos = [], setTodos = () => {}}) => {
       return;
     }
 
-    const tempArr=[]
-    for(let i=0; i<todos.length; i++){
-        if(todos[i].id !== todo.id) {
-            tempArr.push(todos[i])
-        } else {
-            const updatedTodo={
-                ...todo,
-                text: willEditText
-            }
-            tempArr.push(updatedTodo)
-        }
+    const tempArr = [];
+    for (let i = 0; i < todos.length; i++) {
+      if (todos[i].id !== todo.id) {
+        tempArr.push(todos[i]);
+      } else {
+        const updatedTodo = {
+          ...todo,
+          text: willEditText,
+        };
+        tempArr.push(updatedTodo);
+      }
     }
-    setTodos(tempArr);
-    setOpenModal(false)
+    AsyncStorage.setItem('@todos', JSON.stringify(tempArr)).then(() => {
+      setTodos(tempArr);
+      setOpenModal(false);
+    });
   };
 
   return (
